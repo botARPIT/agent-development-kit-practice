@@ -23,10 +23,88 @@ import os
 # Configuration check
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
 google_api_key = os.getenv("GOOGLE_API_KEY")
-if google_api_key:
-    print("Start building!!")
-else:
+if not google_api_key:
     raise ValueError("Unable to find api key")
+    
+
+@dataclass
+class AgentConfig:
+    """ Centralized configuration for cost control """
+    
+    # Select model based on required task
+    outline_model: str = "gemini-2.5-flash-lite"
+    writer_model: str = "gemini-2.5-flash"
+    fact_checking_model : str = "gemini-2.5-flash"
+    editor_model: str = "gemini-2.5-flash-lite"
+    
+    # Define Token limits for cost control
+    outline_max_token : int = 500
+    writer_max_token : int = 600
+    fact_checker_max_token : int = 500
+    editor_max_token : int = 800
+    
+    # Cost tracking
+    flash_lite_cost_per_1k : float = 0.00001
+    flash_cost_per_1k : float = 0.00002
+    
+    # Retry config
+    max_retries : int = 3
+    timeout_seconts : int = 30
+    
+    # Caching
+    enable_cache : bool = True
+    cache_ttl_seconds : int = 3600 
+
+config = AgentConfig()
+
+
+# Cost tracking
+class CostTracker:
+    """ Track cost per agent and total cost """
+    
+    def __init__(self):
+        self.costs = {
+            'outline': 0.0,
+            'writer': 0.0,
+            'fact_checker': 0.0,
+            'editor': 0.0,
+            'total': 0.0
+        }
+        
+        self.token_usage = {
+            'outline': 0,
+            'writer': 0,
+            'fact_checker': 0,
+            'editor': 0,
+            'total': 0
+        }
+        
+    def track(self, agent_name: str, tokens: int, model: str):
+        """Track cost of agent"""
+        if 'lite' in model:
+            cost_per_1k = config.flash_lite_cost_per_1k
+        else:
+            cost_per_1k = config.flash_cost_per_1k
+    
+        cost = (tokens / 1000) * cost_per_1k
+        
+        self.costs[agent_name] += cost
+        self.costs['total'] += cost
+        
+        self.token_usage[agent_name] += tokens
+        self.toke_usage['total'] += tokens
+        
+    
+    def get_cost_report(self):
+        """Get cost report"""
+        return {
+            'costs_usd': self.costs,
+            'tokens': self.token_usage,
+            'cost_per_blog': f"${self.costs['total']:.5f}"
+        }
+        
+cost_tracker = CostTracker()
+         
 
 # Create retry configuration
 def create_retry_configuration():
@@ -34,7 +112,7 @@ def create_retry_configuration():
     """
 
     return types.HttpRetryOptions(
-        attempts=5,
+        attempts=config.max_retries,
         exp_base=2,
         initial_delay=2,
         http_status_codes=[429, 500, 502, 503, 504]
@@ -60,12 +138,10 @@ class OutlineSchema(BaseModel):
         description= "Conclusion thought for the blog"
     )
 
-    additional_information: str = Field(
+    additional_innformation: str = Field(
         description = "Additional information required by other agents"
     )
-    
 
- 
 # Output schema for editor_agent
 
 class EditedBlogSchema(BaseModel):
@@ -75,7 +151,6 @@ class EditedBlogSchema(BaseModel):
         - Main sections with proper headings
         - Sources/References section at the end
         - Conclusion""")
-    sources: str = Field(description= "Contains the list of cited sources")
 
 # Creates outline for the blog, based on the user input
 outline_agent = Agent(
@@ -83,7 +158,7 @@ outline_agent = Agent(
     model=Gemini(
         model="gemini-2.5-flash-lite",
         retry_options=retry_config,
-        temperature = 0.3
+        temperature = 0.3,
     ),
     description="Outline agent, creates outline for the blog depending upon the topic requested by the user",
     instruction=""" You are an expert blog outline creator.
@@ -95,7 +170,7 @@ outline_agent = Agent(
     - A concluding thought
     - Any extra information required by the another agent or any specific condition mentioned by the user MUST be added in `additional_information` section
     """.strip(),
-    
+    # tools=[google_search],
     output_schema = OutlineSchema,
     output_key="blog_outline"
 )
@@ -115,7 +190,7 @@ writer_agent = Agent(
     - The tone of the blog should be ENGAGING and INFORMATIVE
     - Refer to the 'additional_information` section of blog_outline
     - Use `google_search` for fetching latest data and cite sources
-    """.strip(),
+    """,
     output_key="blog_draft",
     tools=[google_search]
 )
@@ -138,7 +213,7 @@ fact_checker_agent = Agent(
     - Provide concise, actionable feedback only (no repetition)
     - Flag vague claims like "astronomical", "massive", "huge" that lack specific data
     - Include the links of verified datasources in feedback
-    """.strip(),
+    """,
     tools = [google_search],
     output_key = "fact_checker_feedback"
 )
@@ -147,11 +222,11 @@ fact_checker_agent = Agent(
 editor_agent=Agent(
     name="editor_agent",
     model=Gemini(
-        model="gemini-2.5-flash-lite",
-        retry_options=retry_config,
-        temperature = 0.3
+    model="gemini-2.5-flash-lite",
+    retry_options=retry_config,
+    temperature = 0.3
     ),
-    instruction="""Given the blog draft and feedback from the fact_checker: {blog_draft} \n {fact_checker_feedback},
+    instruction='''Given the blog draft and feedback from the fact_checker: {blog_draft} \n {fact_checker_feedback},
      Your task is to:
     - Create a "Sources:" or "References:" section at the end with all citations
     - Format citations professionally with source names
@@ -164,7 +239,7 @@ editor_agent=Agent(
     
     Sources:
     [1] ASML - EUV Technology Overview
-    [2] Intel Press Release - High-NA EUV Scanner""".strip(),
+    [2] Intel Press Release - High-NA EUV Scanner''',
     output_key = "final_blog",
     output_schema = EditedBlogSchema 
 )
