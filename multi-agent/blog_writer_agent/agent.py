@@ -8,8 +8,9 @@ Creating a blog writer agent, with hybrid workflow:
     - Critic agent: Evaluates the draft thoroughly based on the predefined criteria, generates a response
                     if approved else trigger the draft agent to rewrite the draft again.
 ''' 
-# Importing basic libraries
 
+
+# Importing basic libraries
 from google.adk.agents import Agent, SequentialAgent, LoopAgent
 from google.adk.models.google_llm import Gemini
 from google.adk.tools import google_search, AgentTool, set_model_response_tool
@@ -67,7 +68,6 @@ class OutlineSchema(BaseModel):
 
  
 # Output schema for editor_agent
-
 class EditedBlogSchema(BaseModel):
     title: str = Field(description= "Engaging blog title")
     content: str = Field(description= """Contains the entire blog body including:
@@ -76,6 +76,8 @@ class EditedBlogSchema(BaseModel):
         - Sources/References section at the end
         - Conclusion""")
     sources: str = Field(description= "Contains the list of cited sources")
+
+
 
 # Creates outline for the blog, based on the user input
 outline_agent = Agent(
@@ -100,11 +102,12 @@ outline_agent = Agent(
     output_key="blog_outline"
 )
 
+
 # Creates draft based on the outline provided
 writer_agent = Agent(
     name="writer_agent",
     model = Gemini(
-        model = "gemini-2.5-flash",
+        model = "gemini-2.5-flash-lite",
         retry_options = retry_config,
         temperature = 0.3,
     ),
@@ -125,7 +128,7 @@ writer_agent = Agent(
 fact_checker_agent = Agent(
     name = "fact_checker_agent",
     model = Gemini(
-        model="gemini-2.5-flash",
+        model="gemini-2.5-flash-lite",
         retry_options = retry_config,
         temperature = 0.1
     ),
@@ -137,7 +140,7 @@ fact_checker_agent = Agent(
     - If URLs don't exist, find the correct URLs or suggest removing them
     - Provide concise, actionable feedback only (no repetition)
     - Flag vague claims like "astronomical", "massive", "huge" that lack specific data
-    - Include the links of verified datasources in feedback
+    - MUST include actual links of verified sources
     """.strip(),
     tools = [google_search],
     output_key = "fact_checker_feedback"
@@ -158,13 +161,7 @@ editor_agent=Agent(
     - Polish and fix grammatical errors
     - Improve writing style and sentence structure
     - DO NOT remove any factual citations or sources
-    
-    Example format:
-    "ASML is the primary supplier of EUV machines [1]."
-    
-    Sources:
-    [1] ASML - EUV Technology Overview
-    [2] Intel Press Release - High-NA EUV Scanner""".strip(),
+    """.strip(),
     output_key = "final_blog",
     output_schema = EditedBlogSchema 
 )
