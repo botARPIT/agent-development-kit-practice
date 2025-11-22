@@ -1,0 +1,115 @@
+{
+  "id": "4b31c3e9-603e-4df5-a577-b7000d25f3d9",
+  "app_name": "agent_with_memory",
+  "user_id": "test_user",
+  "state": {},
+  "events": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "hi my name is sam"
+          }
+        ],
+        "role": "user"
+      },
+      "invocation_id": "e-4e799e14-24da-4f91-9322-afc35ddff123",
+      "author": "user",
+      "actions": {
+        "state_delta": {},
+        "artifact_delta": {},
+        "requested_auth_configs": {},
+        "requested_tool_confirmations": {}
+      },
+      "id": "bcb15848-1845-4d1a-b9cc-ad00f21ef5c1",
+      "timestamp": 1763712669.135244
+    },
+    {
+      "model_version": "gemini-2.5-flash-lite",
+      "content": {
+        "parts": [
+          {
+            "text": "Hi Sam, it's nice to meet you! How can I help you today?"
+          }
+        ],
+        "role": "model"
+      },
+      "finish_reason": "STOP",
+      "usage_metadata": {
+        "candidates_token_count": 18,
+        "prompt_token_count": 33,
+        "prompt_tokens_details": [
+          {
+            "modality": "TEXT",
+            "token_count": 33
+          }
+        ],
+        "total_token_count": 51
+      },
+      "invocation_id": "e-4e799e14-24da-4f91-9322-afc35ddff123",
+      "author": "agent_with_memory",
+      "actions": {
+        "state_delta": {},
+        "artifact_delta": {},
+        "requested_auth_configs": {},
+        "requested_tool_confirmations": {}
+      },
+      "id": "da308355-ae0c-4194-ba86-4dd2137ae580",
+      "timestamp": 1763712669.142869
+    },
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "i would like to visit thailand the next month"
+          }
+        ],
+        "role": "user"
+      },
+      "invocation_id": "e-91cad60f-6995-41b1-bd0c-dd5b049a28a8",
+      "author": "user",
+      "actions": {
+        "state_delta": {},
+        "artifact_delta": {},
+        "requested_auth_configs": {},
+        "requested_tool_confirmations": {}
+      },
+      "id": "1ad7ab16-1124-4a8c-bd74-3c67d70b62a8",
+      "timestamp": 1763712688.695836
+    },
+    {
+      "model_version": "gemini-2.5-flash-lite",
+      "content": {
+        "parts": [
+          {
+            "text": "That sounds like a fantastic plan, Sam! Thailand is an incredible destination with so much to offer. To help you plan your trip, could you tell me a little more about what you're looking for? For example:\n\n*   **What are your interests?** Are you looking for beaches and relaxation, vibrant city life, ancient temples and culture, adventurous activities, delicious food, or a mix of everything?\n*   **What's your approximate budget?** This will help me suggest suitable accommodation and activities.\n*   **Who are you traveling with?** Are you traveling solo, as a couple, with family, or with friends?\n*   **What kind of pace are you looking for?** Do you want to pack in as much as possible, or take a more relaxed approach?\n*   **Are there any specific cities or regions in Thailand you're particularly interested in?** (e.g., Bangkok, Chiang Mai, Phuket, Koh Samui, etc.)\n\nOnce I have a better understanding of your preferences, I can offer more tailored suggestions for your Thailand adventure next month!"
+          }
+        ],
+        "role": "model"
+      },
+      "finish_reason": "STOP",
+      "usage_metadata": {
+        "candidates_token_count": 228,
+        "prompt_token_count": 62,
+        "prompt_tokens_details": [
+          {
+            "modality": "TEXT",
+            "token_count": 62
+          }
+        ],
+        "total_token_count": 290
+      },
+      "invocation_id": "e-91cad60f-6995-41b1-bd0c-dd5b049a28a8",
+      "author": "agent_with_memory",
+      "actions": {
+        "state_delta": {},
+        "artifact_delta": {},
+        "requested_auth_configs": {},
+        "requested_tool_confirmations": {}
+      },
+      "id": "fce56942-af42-438c-88c5-ce2e63aeffb2",
+      "timestamp": 1763712688.696593
+    }
+  ],
+  "last_update_time": 1763712688.696593
+}

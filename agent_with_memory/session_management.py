@@ -3,6 +3,7 @@
 # Importing libraries
 from dotenv import load_dotenv
 import os
+import uuid
 from google.adk.agents import Agent, LlmAgent
 from google.adk.models import Gemini
 from google.genai import types
@@ -32,6 +33,10 @@ def create_retry_config():
 retry_config = create_retry_config()
 
 
+# Create DB persistence
+db_url = "sqlite:///my_agent.db"
+session_service = DatabaseSessionService(db_url=db_url)
+
 # Helper function that helps to manage the complete convesation between user and agent, it does creating/retrieving sessions
 # Also, query processing and response streaming
 
@@ -39,7 +44,7 @@ retry_config = create_retry_config()
 
 async def run_session(
         runner_instance: Runner,
-        user_queries: list[str] | str = None,
+        user_queries = None,
         session_name: str = "default"
 ): 
     # Print the session name
@@ -47,21 +52,22 @@ async def run_session(
      
     # Get app name from runner_instance
     app_name = runner_instance.app_name
+    
 
     # Try to create a new session or retrieve the existing one
     try:
         session = await session_service.get_session(
             app_name = app_name,
             user_id = USER_ID,
-            session_id = session_name
         )
     except:
         session = await session_service.create_session(
             app_name = app_name,
             user_id = USER_ID,
-            session_id = session_name
+            session_id = SESSOIN_ID,
+            state=INITIAL_STATE
         )
-
+    print(session.id)
     # Process queries of user
     # If single user query => convert it to list => format it to be suitable for Agent
     # If multiple user queries => process each query sequentially just as mentioned above
@@ -81,7 +87,7 @@ async def run_session(
             # Stream the agent's response asynchronously
             async for event in runner_instance.run_async(
                 user_id = USER_ID,
-                session_id = session_name,
+                session_id = session.id,
                 new_message = query
             ):
                 # Check if content of event is valid
@@ -97,9 +103,10 @@ async def run_session(
 
 print("Created helper function")
 
-MODEL_NAME = "gemini-2.5-flash-2.5"
+MODEL_NAME = "gemini-2.5-flash-lite"
 
 root_agent = Agent(
+    name="agent_with_memory",
     model = Gemini(
         model = MODEL_NAME,
         retry_options = retry_config
@@ -108,17 +115,20 @@ root_agent = Agent(
 )
 
 # Create session using InMemorySessionService
-session_service = InMemorySessionService()
+# session_service = InMemorySessionService()
 
-APP_NAME = "default"
+APP_NAME = "agents"
 USER_ID = "default"
 SESSION = "default"
-
+SESSOIN_ID = str(uuid.uuid4())
+INITIAL_STATE = {"name": "bhoot",
+                 "favourite_destination_to_visit": "guwahti"}
 # Create runner
 runner = Runner(
     agent=root_agent,
     app_name=APP_NAME,
-    session_service=session_service
+    session_service=session_service,
+    
 )
 
 print("Agent Initialized")
@@ -128,10 +138,11 @@ async def main():
         runner,
         ["Hi, I am Bhoot! What is capital of Bahamas",
         "What is my name"],
-        "stateful-session"
+        "test-2-session"
 )
     
-import asyncio
-asyncio.run(main())
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
     
      

@@ -3,6 +3,7 @@
 # Importing libraries
 from dotenv import load_dotenv
 import os
+import uuid
 from google.adk.agents import Agent, LlmAgent
 from google.adk.models import Gemini
 from google.genai import types
@@ -44,28 +45,34 @@ session_service = DatabaseSessionService(db_url=db_url)
 async def run_session(
         runner_instance: Runner,
         user_queries = None,
-        session_name: str = "default"
+        session_name : str = "default"
 ): 
     # Print the session name
     print(f"Session name: {session_name}")
      
     # Get app name from runner_instance
     app_name = runner_instance.app_name
+    
 
     # Try to create a new session or retrieve the existing one
     try:
         session = await session_service.get_session(
             app_name = app_name,
             user_id = USER_ID,
-            session_id=session_name
+            session_id= session_name
         )
-    except:
-        session = await session_service.create_session(
+        if session != None:
+            ()
+        else:
+            session = await session_service.create_session(
             app_name = app_name,
             user_id = USER_ID,
-            session_id=session_name
+            session_id= session_name
         )
-
+    except:
+        print("Unable to create session")
+    print(session)
+    print(type(session))
     # Process queries of user
     # If single user query => convert it to list => format it to be suitable for Agent
     # If multiple user queries => process each query sequentially just as mentioned above
@@ -115,10 +122,11 @@ root_agent = Agent(
 # Create session using InMemorySessionService
 # session_service = InMemorySessionService()
 
-APP_NAME = "default"
+APP_NAME = "agents"
 USER_ID = "default"
-SESSION = "default"
-
+SESSION_NAME = "default"
+INITIAL_STATE = {"name": "bhoot",
+                 "favourite_destination_to_visit": "guwahti"}
 # Create runner
 runner = Runner(
     agent=root_agent,
@@ -129,13 +137,29 @@ runner = Runner(
 
 print("Agent Initialized")
 
+# async def main():
+#     try: 
+#         await run_session(
+#         runner,
+#         ["Hi, I am Bhoot! What is capital of Bahamas",
+#         "What is my name"],
+#         "test-2-session"
+#         )
+#     finally: 
+#         try:
+#             await runner.close()
+#         except Exception as e:
+#             print("Warning: runner.close() raised: ", repr(e))
+         
 async def main():
-    await run_session(
-        runner,
-        ["Hi, I am Bhoot! What is capital of Bahamas",
-        "What is my name"],
-        "test-1-session"
-)
+    while True:
+        user_input = input("You: ")
+        
+        if user_input.lower() in ["exit"]:
+            print("Ending conversation")
+            break
+        
+        await run_session(runner, user_input, "tester_of_agentic_system")
     
 if __name__ == "__main__":
     import asyncio
