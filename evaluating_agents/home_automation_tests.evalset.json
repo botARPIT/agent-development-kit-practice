@@ -1,0 +1,141 @@
+{
+  "eval_set_id": "home_automation_tests",
+  "name": "home_automation_tests",
+  "eval_cases": [
+    {
+      "eval_id": "basis_device_control",
+      "conversation": [
+        {
+          "invocation_id": "e-2d0f5688-dce1-4c2d-9191-8d5e1eb7dcd5",
+          "user_content": {
+            "parts": [
+              {
+                "text": "Turn on the fan in office"
+              }
+            ],
+            "role": "user"
+          },
+          "intermediate_data": {
+            "invocation_events": [
+              {
+                "author": "evaluating_agents",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "id": "adk-6d5d2731-666d-436b-b1f0-a0d7fa57f7f8",
+                        "args": {
+                          "status": "ON",
+                          "location": "office",
+                          "device_id": "fan"
+                        },
+                        "name": "set_device_status"
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "evaluating_agents",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "id": "adk-6d5d2731-666d-436b-b1f0-a0d7fa57f7f8",
+                        "name": "set_device_status",
+                        "response": {
+                          "success": true,
+                          "message": "Successfully set the fan in office to ON."
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              }
+            ]
+          },
+          "creation_timestamp": 1763895675.352395
+        }
+      ],
+      "session_input": {
+        "app_name": "evaluating_agents",
+        "user_id": "user"
+      },
+      "creation_timestamp": 1763895805.318333
+    },
+    {
+      "eval_id": "basic_device_control",
+      "conversation": [
+        {
+          "invocation_id": "e-c573b4cd-77c2-4017-b849-0fb298147f62",
+          "user_content": {
+            "parts": [
+              {
+                "text": "turn on the fan in hall"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "The fan in the hall is now on."
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "invocation_events": [
+              {
+                "author": "evaluating_agents",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "id": "adk-f6f0da01-4bcf-4691-857e-57822a3c3f33",
+                        "args": {
+                          "location": "hall",
+                          "status": "ON",
+                          "device_id": "fan"
+                        },
+                        "name": "set_device_status"
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "evaluating_agents",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "id": "adk-f6f0da01-4bcf-4691-857e-57822a3c3f33",
+                        "name": "set_device_status",
+                        "response": {
+                          "success": true,
+                          "message": "Successfully set the fan in hall to ON."
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              }
+            ]
+          },
+          "creation_timestamp": 1763896894.393269
+        }
+      ],
+      "session_input": {
+        "app_name": "evaluating_agents",
+        "user_id": "user"
+      },
+      "creation_timestamp": 1763897004.1922667
+    }
+  ],
+  "creation_timestamp": 1763895760.2710962
+}

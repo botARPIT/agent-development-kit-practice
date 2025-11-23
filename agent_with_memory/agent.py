@@ -34,7 +34,7 @@ retry_config = create_retry_config()
 
 
 # Create DB persistence
-db_url = "sqlite:///my_agent.db"
+db_url = "sqlite:///my_agent_with_event_compaction.db"
 session_service = DatabaseSessionService(db_url=db_url)
 
 # Helper function that helps to manage the complete convesation between user and agent, it does creating/retrieving sessions
@@ -110,7 +110,7 @@ print("Created helper function")
 
 MODEL_NAME = "gemini-2.5-flash-lite"
 
-root_agent = Agent(
+chatbot_agent = Agent(
     name="agent_with_memory",
     model = Gemini(
         model = MODEL_NAME,
@@ -127,15 +127,32 @@ USER_ID = "default"
 SESSION_NAME = "default"
 INITIAL_STATE = {"name": "bhoot",
                  "favourite_destination_to_visit": "guwahti"}
-# Create runner
-runner = Runner(
-    agent=root_agent,
-    app_name=APP_NAME,
-    session_service=session_service,
+# # Create runner
+# runner = Runner(
+#     agent=root_agent,
+#     app_name=APP_NAME,
+#     session_service=session_service,
     
-)
+# )
 
 print("Agent Initialized")
+
+# Defining app for event compaction
+research_app_compacting = App(
+    name = "research_app_compacting",
+    root_agent= chatbot_agent,
+    events_compaction_config = EventsCompactionConfig(
+        compaction_interval = 5,
+        overlap_size = 2
+    ),
+)
+
+# Creating a runner for compact app
+research_runner = Runner(
+    app = research_app_compacting, 
+    session_service = session_service
+)
+
 
 # async def main():
 #     try: 
@@ -159,7 +176,7 @@ async def main():
             print("Ending conversation")
             break
         
-        await run_session(runner, user_input, "tester_of_agentic_system")
+        await run_session(research_runner, user_input, "tester_of_agentic_system")
     
 if __name__ == "__main__":
     import asyncio
